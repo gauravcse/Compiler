@@ -1,0 +1,5 @@
+A->Bd
+B->CY|fY
+C->fYeX
+X->YeX
+Y->dY

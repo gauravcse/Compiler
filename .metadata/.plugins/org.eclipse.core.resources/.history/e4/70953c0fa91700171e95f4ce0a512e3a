@@ -1,0 +1,230 @@
+/*
+ * created By : Gaurav Mitra
+ * 
+ * This Class is used to compute the Symbol Table for the Grammar 
+ * 
+ * */
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+/* Class Item  : 
+ * 				Stores each token taken from the Lexical analyser as
+ * 				a member of this class.
+ * 
+ */
+
+class Item {
+	private final String types[] = {"KEYWORD","IDENTIFIER","ARITHMATIC","RELATIONAL","ASSIGN","DELIMITER","NUM"};
+	String token;
+	String type;
+	int xpos;
+	int ypos;
+	
+	Item(String line) {
+		String array[] = line.split("\t");
+		System.out.println(array[0] + " : " + array[1] + " : " + array[2] + " : " + array[3] + " : " + array[4]);
+		for(int i = 0; i < array.length; i++) {
+			array[i] = array[i].trim();
+		}
+		this.token = array[2];
+		this.type = types[Integer.parseInt(array[0]) - 1];
+		this.xpos = Integer.parseInt(array[3]);
+		this.ypos = Integer.parseInt(array[4]);
+	}
+}
+
+
+/* Class Symbol  : 
+ * 				Stores the symbols in a form so that they can be saved 
+ * 				in a symbol table.
+ * 
+ */
+
+class Symbol {
+	String type;
+	String name;
+	int level;
+	int xpos;
+	int ypos;
+	
+	public Symbol(Item cur,int curlevel,Item prev) {
+		if(cur.type.equals("IDENTIFIER")) {
+			type = prev.token;
+			name = cur.token;
+			level = curlevel;
+			xpos = cur.xpos;
+			ypos = cur.ypos;
+		}
+		else {
+			type = "NUM";
+			name = cur.token;
+			level = curlevel;
+			xpos = cur.xpos;
+			ypos = cur.ypos;
+		}
+	}
+	public Symbol(Item cur,int curlevel,Item prev,HashMap<Integer,ArrayList<Symbol>> symbols) {
+		if(cur.type.equals("IDENTIFIER")) {
+			if(symbols.containsKey(curlevel)) {
+				boolean there = false;
+				for(int i = 0; i < symbols.get(curlevel).size(); i++) {
+					System.out.println("LEVEL : " + symbols.get(curlevel).get(i).name);
+					if(symbols.get(curlevel).get(i).name.equals(cur.token)) {
+						//This token is already there in the ST
+						there = true;
+					}
+				}
+				if(!there) {
+					//ADD TO ST
+					type = prev.token;
+					name = cur.token;
+					level = curlevel;
+				}
+			}
+			else {
+				type = prev.token;
+				name = cur.token;
+				level = curlevel;
+				//ADD TO ST
+			}
+		}
+	}
+}
+
+
+/* Class SymbolTable  : 
+ * 				Stores the symbol table as an arraylist of
+ *				objects of the class Symbol 				
+ *
+ */
+
+public class SymbolTable {
+
+	// symbol : A data structure to save the symbol table
+	// table : Saves the scope along with each symbol in the table. 
+			   This is used just to increase the effiecieny of computation
+			   in latter stages.
+	// id :
+	// cons :
+	
+	ArrayList<Item> symbol = new ArrayList<>();
+	HashMap<Integer,ArrayList<Symbol>> table;
+	HashMap<String,ArrayList<Symbol>> id = new HashMap<>();
+	HashMap<String,Symbol> cons = new HashMap<>();
+	
+	public SymbolTable(String filename) throws IOException {
+		File file = new File(filename);
+		FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
+		while(true) {
+			String line = br.readLine();
+			if(line == null)
+				break;
+			else {
+				Item i = new Item(line);
+				symbol.add(i);
+			}
+		}
+		br.close();
+		this.table = new HashMap<>();
+	}
+	
+	public void generate() {
+		int level = 0;
+		for(int i = 0; i < symbol.size(); i++) {
+			if(symbol.get(i).type.equals("DELIMITER") && symbol.get(i).token.equals("{"))
+				level++;
+			if(symbol.get(i).type.equals("DELIMITER") && symbol.get(i).token.equals("}"))
+				level--;
+			if(symbol.get(i).type.equals("IDENTIFIER")) {
+				if(i > 0) {
+					Symbol s = new Symbol(symbol.get(i), level, symbol.get(i - 1));
+					ArrayList<Symbol> allSymbols = new ArrayList<>();
+					if(table.containsKey(level))
+						allSymbols.addAll(table.get(level));
+					allSymbols.add(s);
+					table.put(level, allSymbols);
+				}
+				else {
+					System.out.println("ERROR!");
+				}
+			}
+			if(symbol.get(i).type.equals("NUM")) {
+				if(i > 0) {
+					Symbol s = new Symbol(symbol.get(i), level, symbol.get(i - 1));
+					ArrayList<Symbol> allSymbols = new ArrayList<>();
+					if(table.containsKey(level))
+						allSymbols.addAll(table.get(level));
+					allSymbols.add(s);
+					table.put(level, allSymbols);
+				}
+				else {
+					System.out.println("ERROR!");
+				}
+			}
+		}
+		for(int i = 0; i < 6; i++) {
+			if(table.containsKey(i)) {
+				for(int j = 0; j < table.get(i).size(); j++) {
+					if(!table.get(i).get(j).type.equals("NUM") && id.containsKey((table.get(i).get(j).name))) {
+						ArrayList<Symbol> temp = new ArrayList<>();
+						temp.addAll(table.get(i));
+						temp.add(table.get(i).get(j));
+						id.put(table.get(i).get(j).name, temp);
+					}
+					else if(!table.get(i).get(j).type.equals("NUM") && !id.containsKey(table.get(i).get(j).name)) {
+						ArrayList<Symbol> temp = new ArrayList<>();
+						temp.add(table.get(i).get(j));
+						id.put(table.get(i).get(j).name, temp);
+					}
+					else if(table.get(i).get(j).type.equals("NUM")) {
+						cons.put(table.get(i).get(j).name, table.get(i).get(j));
+					}
+				}
+			}
+		}
+	}
+	
+	public void printTable() {
+		for(int i = 0; i < 6; i++) {
+			if(table.containsKey(i)) {
+				for(int j = 0; j < table.get(i).size(); j++) {
+					System.out.println(table.get(i).get(j).type + "\t" + table.get(i).get(j).level + "\t" + table.get(i).get(j).name + "\t");
+				}
+			}
+		}
+	}
+	
+	public void printDetails() {
+		Iterator<Entry<String, ArrayList<Symbol>>> iter = id.entrySet().iterator();
+		while(iter.hasNext()) {
+			Entry<String, ArrayList<Symbol>> pair = iter.next();
+	        //System.out.print(pair.getKey() + " = ");
+	        for(int i = 0; i < pair.getValue().size(); i++) {
+	        	if(pair.getValue().get(i).type.equals("int") || pair.getValue().get(i).type.equals("float"))
+	        		System.out.println("Variable : " + pair.getKey() + " [Type : " + pair.getValue().get(i).type + "] Declaration => (X_POS : " + pair.getValue().get(i).xpos + " YPOS : " + pair.getValue().get(i).ypos + ")");
+	        	else
+	        		System.out.println("Variable : " + pair.getKey() + " | Usage => (X_POS : " + pair.getValue().get(i).xpos + " YPOS : " + pair.getValue().get(i).ypos + ")");
+	        }
+	        iter.remove();
+		}
+		
+	}
+	
+	public static void main(String args[]) throws IOException {
+		SymbolTable st = new SymbolTable("output.txt");
+		for(int i = 0; i < st.symbol.size(); i++) {
+			System.out.println(st.symbol.get(i).token);
+		}
+		st.generate();
+		st.printTable();
+		st.printDetails();
+	}
+}

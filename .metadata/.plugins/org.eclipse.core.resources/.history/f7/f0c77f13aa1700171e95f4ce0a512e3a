@@ -1,0 +1,70 @@
+/*
+ * created By : Gaurav Mitra
+ * 
+ * This Class is used to test on Input programs 
+ * 
+ * */
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Stack;
+
+
+public class Test {
+	
+	// stack : Stack for the LL1 parser
+	// symbol : Saves the output of the Tokeniser and the Symbol Table
+	// comp : A Compiler class Object
+	
+	Stack<String> stack = new Stack<>();
+	ArrayList<Item> symbol = new ArrayList<>();
+	Compile comp = new Compile();
+	
+	Test(String filename) throws IOException {
+		File file = new File(filename);
+		FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
+		while(true) {
+			String line = br.readLine();
+			if(line == null)
+				break;
+			else {
+				Item i = new Item(line);
+				symbol.add(i);
+			}
+		}
+		comp.compute();
+		br.close();
+		stack.push("program");
+		//System.out.print(comp.ptable);
+	}
+	
+	void compute() {
+		int pos = 0;
+		while(!stack.empty() && pos < symbol.size()) {
+			String top = stack.peek();
+			String input = symbol.get(pos).token;
+			System.out.println("Top : " + top + "\tInput : " + input + stack.toString());
+			if(input.equals(top)) {
+				pos++;
+				stack.pop();
+			}
+			else {
+				stack.pop();
+				String prod = comp.ptable.get(top).get(input);
+				String arr[] = prod.split(" ");
+				for(int i = 0; i < arr.length; i++)
+					stack.push(arr[i]);
+			}
+		}
+	}
+	
+	public static void main(String [] args) throws NullPointerException, IOException {
+		Test t = new Test("b.txt");
+		t.compute();
+	}
+	
+}

@@ -1,0 +1,173 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+
+
+public class FirstFollow {
+	
+	
+	HashMap<String,Production> lookup = new HashMap<>();
+	HashMap<String,Set<String>> first = new HashMap<String,Set<String>>();
+	HashMap<String,Set<String>> follow = new HashMap<String,Set<String>>();
+	Set<String> nonTer;
+	Set<String> terminal;
+	Grammar g1;
+	
+	public FirstFollow() throws NullPointerException, IOException {
+		g1 = new Grammar("program_ll.txt");
+		g1.storeMap(lookup);
+		nonTer  = new HashSet<>(g1.nonTerminals);
+		File file = new File("terminal.txt");
+		FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
+		String line = br.readLine();
+		ArrayList<String> t = new ArrayList<String>(Arrays.asList(line.split(",")));
+		terminal = new HashSet<String>(t);
+		br.close();
+	}
+	
+	public void computeFirst(String current) {
+		//System.out.println(current);
+		if(first.containsKey(current))
+			return;
+		else {
+			Set<String> forcurrent = new HashSet<String>();
+			for(int i = 0; i < lookup.get(current).productions.size(); i++) {
+				Iterator<String> iter = nonTer.iterator();
+				String p1 = lookup.get(current).productions.get(i);
+				int p1size = p1.length();
+				boolean has_non_T = false;
+				while(iter.hasNext()) {
+					String cur_nonT = iter.next();
+					int cur_nonT_size = cur_nonT.length();
+					if(p1size >=  cur_nonT_size) {
+						String start = p1.substring(0,cur_nonT_size);
+						if(start.equalsIgnoreCase(cur_nonT)) {
+							if(!first.containsKey(cur_nonT)) {
+								computeFirst(cur_nonT);
+							}
+							//System.out.println("Non t :" + cur_nonT);
+							forcurrent.addAll(first.get(cur_nonT));
+				//			System.out.println(current + " -> " + forcurrent.toString());
+							has_non_T = true;
+							break;
+						}
+					}
+				}
+				if(!has_non_T) {
+					//System.out.println("NonTermianl : " + current);
+					iter = terminal.iterator();
+					while(iter.hasNext()) {
+						String cur_T = iter.next();
+						int cur_T_size = cur_T.length();
+						if(p1size >=  cur_T_size) {
+							String start = p1.substring(0,cur_T_size);
+							if(start.equals(cur_T)) {
+								forcurrent.add(cur_T);
+			//					System.out.println(current + " -> " + forcurrent.toString());
+							}
+						}
+					}
+				}
+			}
+			first.put(current, forcurrent);
+		}
+	}
+	
+	public void computeFollow(String current) {
+		int cur_l = current.length();
+		Set<String> curFollow = new Set<String>();
+		Iterator<String> iter = nonTer.iterator();
+		while(iter.hasNext()) {
+			String curNonTer = iter.next();
+			for(int i = 0; i < lookup.get(curNonTer).productions.size();i++) {
+				String p1 = lookup.get(current).productions.get(i);
+				int p1size = p1.length();
+				if(cur_l < p1size)
+					continue;
+				else {
+					int position = p1.indexOf(current);
+					String rest = p1.substring(position).trim();
+					if(rest.length() > 0) {
+						String ter = checkTerminal(rest);
+						if(ter != null) {
+							//Add this nonTerminal to Set Follow
+						}
+						else {
+							ter = checkNonTerminal(rest);
+							if(!follow.containsKey(ter))
+								computeFollow(ter);
+							
+							//Add this ter Follow to current
+						}
+					}
+				}
+				
+				
+				
+				
+				
+				
+				/*while(pointer < p1size) {
+					Iterator<String> iterator = terminal.iterator();
+					for(;;) {
+						//Non Terminals Here
+						iterator = terminal.iterator();
+						while(iterator.hasNext()) {
+							String cur_T = iterator.next();
+							int cur_T_size = cur_T.length();
+							if( (p1size - pointer) >=  cur_T_size) {
+								String start = p1.substring(pointer,cur_T_size);
+								if(start.equals(cur_T)) {
+									pointer += (cur_T_size + 1);
+									break;
+								}
+							}
+						}
+						
+					}
+					
+				}*/
+			}
+		}
+	}
+	
+	
+	public void computeFirstOfGrammar() {
+		Iterator<String> iter = nonTer.iterator();
+		while(iter.hasNext()) {
+			computeFirst(iter.next());
+		}
+	}
+	
+	public void printFirst() {
+		Set<String> main_set = new HashSet<>(Arrays.asList("int","void"));
+		Set<String> prog_set = new HashSet<>(Arrays.asList("int","float"));
+		Iterator<String> iter = nonTer.iterator();
+		while(iter.hasNext()) {
+			String cur = iter.next();
+			if(cur.equals("main_func")) {
+				//System.out.print("Visited\n");
+				first.put(cur, main_set);
+			}
+			if(cur.equals("program")) {
+				first.put(cur, prog_set);
+			}
+			System.out.println(cur + " -> " + first.get(cur).toString());
+		}
+	}
+	
+	public static void main(String [] args) throws NullPointerException, IOException {
+		FirstFollow f = new FirstFollow();
+		f.computeFirstOfGrammar();
+		f.printFirst();
+	}
+}

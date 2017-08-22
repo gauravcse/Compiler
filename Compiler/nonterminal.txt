@@ -1,0 +1,1 @@
+program,declaration,main_func,ret_type,cmd_args,exe,type,id_list,id_decl,stmt,expr,assignment,write_stmt,read_stmt,if_stmt,for_stmt,assignop,optional_expr,sub_block,R,relop,term,addop,factor,multop

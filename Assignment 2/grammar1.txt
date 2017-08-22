@@ -1,0 +1,17 @@
+A->BC
+B->b
+B->e
+C->c
+C->Dc
+C->e
+D->d
+
+
+E->TZ
+Z->+TZ
+Z->e
+T->FY
+Y->*FY
+Y->e
+F->(a)
+F->b

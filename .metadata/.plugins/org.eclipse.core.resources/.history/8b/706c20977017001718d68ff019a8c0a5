@@ -1,0 +1,96 @@
+/*
+ * created By : Gaurav Mitra
+ * 
+ * This Class is used to remove the left recursion from the Grammar 
+ * given as an input.
+ * A new left recursion removed 
+ * 
+ * */
+
+
+import java.io.IOException;
+
+public class LeftRecursion {
+	
+	public Grammar g;
+	
+	public LeftRecursion(Grammar g) {
+		this.g = g;
+	}
+	
+	public void removeLL() {
+		int nonTlen = g.nonTerminals.size();
+		Grammar newgrammar = new Grammar();
+		for(int i = 0; i < nonTlen; i++) {
+			Grammar temp = new Grammar();
+			Production p = g.grammar.get(i);
+			for(int j = 0; j < i; j++) {
+				p = removeIndirect(p,g.grammar.get(j));
+				//if(p.productions.size() > 0) {
+					temp.add(p);
+					//System.out.println(p.productions.toString());
+				//}
+				//System.out.println(g.grammar.get(i).nonT + " <--> " + g.grammar.get(j).nonT);
+				//temp.printGrammar();
+			}
+			String prettyprinter = p.nonT + " -> ";
+			for(String prod :  p.productions)
+				prettyprinter += prod + " | ";
+			System.out.println(prettyprinter);
+//			temp.printGrammar();
+			newgrammar.update(removeDirect(temp));
+		}
+		//newgrammar.printGrammar();
+	}
+	
+	public Grammar removeDirect(Grammar gram) {
+		Grammar temp = new Grammar();
+		for(int i = 0; i < gram.grammar.size(); i++) {
+			Production p = gram.grammar.get(i);
+			for(int j = 0; j < p.productions.size(); j++) {
+				if(p.productions.get(j).startsWith(p.nonT)) {
+					System.out.print("Direct Visited");
+					for(int k = 0; k < p.productions.size(); k++) {
+						if(!p.productions.get(k).startsWith(p.nonT)) {
+							Production p1 = new Production();
+							p1.nonT = p.nonT + "'";
+							p1.productions.add(p.productions.get(k) + p.productions.get(j).substring(p.nonT.length(),p.productions.get(k).length()));
+						}
+					}
+				}
+			}
+			temp.add(p);
+		}
+		return temp;
+	}
+	
+	public Production removeIndirect(Production ai,Production aj) {
+		Production newp = new Production();
+		newp.nonT = ai.nonT;
+//		System.out.println(ai.nonT + " : " + aj.nonT);
+		for(String aiprod : ai.productions) {
+			//System.out.println(aiprod);
+			if(aiprod.startsWith(aj.nonT)) {
+				//System.out.println("Indirect Visited");
+				for(int i = 0; i < aj.productions.size(); i++) {
+					String addP = aj.productions.get(i);
+					//System.out.println(addP);
+					//System.out.print(aj.nonT.length() + " , " + aiprod.length());
+					String s = addP + aiprod.substring(aj.nonT.length(),aiprod.length());
+					//System.out.println(" : " + s);
+					newp.productions.add(s);
+				}
+			}
+			else {
+				newp.productions.add(aiprod);
+			}
+		}
+		return newp;
+	}
+	
+	public static void main(String [] args) throws NullPointerException, IOException {
+		Grammar g1 = new Grammar("prog_gram1.txt");
+		LeftRecursion l = new LeftRecursion(g1);
+		l.removeLL();
+	}
+}

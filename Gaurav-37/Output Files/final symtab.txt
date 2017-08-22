@@ -1,0 +1,15 @@
+		SYMBOL TABLE FOR FILE a.c
+		-------------------------
+Variable : a [Type : float] Declaration => (X_POS : 7 YPOS : 3) Scope => 1
+Variable : a | Usage => (X_POS : 10 YPOS : 5)
+Variable : a | Usage => (X_POS : 10 YPOS : 7)
+Variable : a | Usage => (X_POS : 10 YPOS : 5)
+Variable : b [Type : float] Declaration => (X_POS : 10 YPOS : 3) Scope => 1
+Variable : b | Usage => (X_POS : 4 YPOS : 8)
+Variable : b | Usage => (X_POS : 9 YPOS : 10)
+Variable : b | Usage => (X_POS : 10 YPOS : 11)
+Variable : b | Usage => (X_POS : 6 YPOS : 8)
+Variable : c [Type : float] Declaration => (X_POS : 10 YPOS : 7) Scope => 2
+Variable : c | Usage => (X_POS : 8 YPOS : 8)
+Variable : c | Usage => (X_POS : 9 YPOS : 10)
+Variable : c | Usage => (X_POS : 10 YPOS : 11)

@@ -1,0 +1,1 @@
+func,(,),{,},void,e$,int,float,id,=,num,print,scan,for,if,>,<,>=,<=,==,!=,+,-,*,/,%,;

@@ -1,0 +1,24 @@
+prog -> declaration program | main_func
+main_func -> ret_type main ( cmd_args ) { exe }
+cmd_args -> void | e$
+ret_type -> int | void
+declaration -> type id_list ;
+type -> int | float
+id_list -> id_decl | id_decl , id_list
+id_decl -> id | id = num
+exe -> stmt exe | e$
+stmt ->  for_stmt | if_stmt | read_stmt | write_stmt | type id_list | assignment | expr ;
+assignment -> id assignop expr ;
+assignop -> = | += | -= | *= | /= | %= | ||= | &&= | |= | &= | ~= | ^= | <<= | >>=
+write_stmt -> print ( expr ) ;
+read_stmt -> read ( id ) ;
+for_stmt -> for ( optional_expr ; optional_expr ; optional_expr ) sub_block
+sub_block -> { exe } | stmt
+optional_expr -> expr | e$
+expr -> assignment | R relop expr | R  
+R -> term addop R | term
+term -> factor multop term | factor
+factor -> ( expr ) | id | num
+relop -> > | < | >= | <= | == | !=
+addop -> + | -
+multop -> * | / | %

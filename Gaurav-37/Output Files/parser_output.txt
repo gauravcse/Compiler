@@ -1,0 +1,102 @@
+$ program									int		[ program , int ] => [ program -> main_func ]
+$ main_func									int 	[ main_func , int ] => [ main_func -> ret_type main ( cmd_args ) { exe } ]
+$ { exe } ) cmd_args ( main ret_type 		int		[ ret_type , int ] => [ ret_type -> int ]
+$ { exe } ) cmd_args ( main int 			int 	Match 
+$ { exe } ) cmd_args ( main					main	Match
+$ } exe { ) cmd_args (						(		Match
+$ } exe { ) cmd_args						void	[ cmd_args , void ] => [ cmd_args -> void ]
+$ } exe { ) void							void	Match
+$ } exe { )									)		Match
+$ } exe {									{		Match
+$ } exe										int		[ exe , int ] => [ exe -> stmt exe ]
+$ } exe stmt								id		[ stmt , id ] => [ stmt -> expr ; ]		
+$ } exe ; expr								id		[ expr , id ] => [ expr -> R ]
+$ } exe ; R									id		[ R , id ] => [ R -> term ]
+$ } exe ; term								id		[ term , id ] => [ term -> factor ]
+$ } exe ; factor							id		[ factor , id ] => [ factor -> id ]
+$ } exe ; id								id		Match
+$ } exe ;									;		Match
+$ } exe										scan	[ exe , scan ] => [ exe -> stmt exe ]
+$ } exe stmt								scan	[ stmt , scan] ] => [ stmt -> read_stmt ]
+$ } exe read_stmt							scan	[ read_stmt , scan ] => [ read_stmt -> scan ( id ) ; ]
+$ } exe ; ) id ( scan						scan	Match
+$ } exe ; ) id (							(		Match
+$ } exe ; ) id								id		Match
+$ } exe ; )									)		Match
+$ } exe ;									;		Match
+$ } exe										if		[ exe , if ] => [ exe -> stmt exe ]
+$ } exe stmt								if		[ stmt , if ] => [ stmt -> if_stmt ]
+$ } exe if_stmt								if		[ if_stmt , if ] => [ if_stmt -> if ( expr ) sub_block ]
+$ } exe sub_block ) expr ( if				if		Match
+$ } exe sub_block ) expr (					(		Match
+$ } exe sub_block ) expr					id		[ expr , id ] => [ expr -> R ]
+$ } exe sub_block ) R						id		[ R , id ] => [ R -> term ]
+$ } exe sub_block ) term					id		[ term , id ] => [ term -> factor relop factor]
+$ } exe sub_block ) factor relop factor		id		[ factor , id ] => [ factor -> id ]
+$ } exe sub_block ) factor relop id			id		Match
+$ } exe sub_block ) factor relop			<		[ relop , < ] => [ relop -> < ]
+$ } exe sub_block ) factor < 				<		Match
+$ } exe sub_block ) factor					id		[ factor , id ] => [ factor -> id ]
+$ } exe sub_block ) id						id		Match
+$ } exe sub_block )							)		Match
+$ } exe sub_block							{		[ sub_block , { ] => [ sub_block -> { exe } ]
+$ } exe	} exe {								{		Match
+$ } exe	} exe								print	[ exe , print] ] => [ exe -> stmt exe ]
+$ } exe	} exe stmt							print	[ stmt , print] ] => [ stmt -> write_stmt ]
+$ } exe	} exe write_stmt					print	[ write_stmt , print ] => [ write_stmt -> print ( expr ) ; ]
+$ } exe	} exe ; ) expr ( print				print	Match
+$ } exe	} exe ; ) expr (					(		Match
+$ } exe	} exe ; ) expr						id		[ expr , id ] => [ expr -> R ]
+$ } exe	} exe ; ) R							id		[ R , id ] => [ R -> term ]
+$ } exe	} exe ; ) term						id		[ term , id ] => [ term -> factor]
+$ } exe	} exe ; ) factor					id		[ factor , id ] => [ factor -> id ]
+$ } exe	} exe ; ) id						id		Match
+$ } exe	} exe ; )							)		Match
+$ } exe	} exe ;								;		Match
+$ } exe	} exe								}		[ exe , e$ ] => [ exe -> e$ ]
+$ } exe	}									}		Match
+$ } exe										for		[ exe , for ] => [ exe -> stmt exe ]
+$ } exe stmt								for		[ stmt , for ] => [ stmt -> for_stmt ]
+$ } exe for_stmt							for		[ for_stmt , for ] => [ for_stmt -> for ( optional_expr ; optional_expr ; optional_expr ) sub_block ]
+$ } exe sub_block ) optional_expr ; optional_expr ; optional_expr ( for		for		Match
+$ } exe sub_block ) optional_expr ; optional_expr ; optional_expr (			(		Match
+$ } exe sub_block ) optional_expr ; optional_expr ; optional_expr			id		[ optional_expr , id ] => [ optional_expr -> expr ]
+$ } exe sub_block ) optional_expr ; optional_expr ; expr					id		[ expr , id ] => [ expr -> R ]
+$ } exe sub_block ) optional_expr ; optional_expr ; R						id		[ R , id ] => [ R -> term ]
+$ } exe sub_block ) optional_expr ; optional_expr ; term					id		[ term , id ] => [ term -> factor relop factor ]
+$ } exe sub_block ) optional_expr ; optional_expr ; factor relop factor		id		[ factor , id ] => [ factor -> id ]
+$ } exe sub_block ) optional_expr ; optional_expr ; factor relop id			id		Match
+$ } exe sub_block ) optional_expr ; optional_expr ; factor relop			=		[ relop , = ] => [ relop -> = ]
+$ } exe sub_block ) optional_expr ; optional_expr ; factor =				=		Match
+$ } exe sub_block ) optional_expr ; optional_expr ; factor					id		[ factor , id ] => [ factor -> id ]
+$ } exe sub_block ) optional_expr ; optional_expr ; id						id		Match
+$ } exe sub_block ) optional_expr ; optional_expr ;							;		Match
+$ } exe sub_block ) optional_expr ; optional_expr 							id		[ optional_expr , id ] => [ optional_expr -> expr ]
+$ } exe sub_block ) optional_expr ; expr									id		[ expr , id ] => [ expr -> R ]
+$ } exe sub_block ) optional_expr ; R										id		[ R , id ] => [ R -> term ]
+$ } exe sub_block ) optional_expr ; term									id		[ term , id ] => [ term -> factor relop factor ]
+$ } exe sub_block ) optional_expr ; factor relop factor						id		[ factor , id ] => [ factor -> id ]
+$ } exe sub_block ) optional_expr ; factor relop id							id		Match
+$ } exe sub_block ) optional_expr ; factor relop							<		[ relop , < ] => [ relop -> < ]
+$ } exe sub_block ) optional_expr ; factor <								<		Match
+$ } exe sub_block ) optional_expr ; factor									id		[ factor , id ] => [ factor -> id ]
+$ } exe sub_block ) optional_expr ; id										id		Match
+$ } exe sub_block ) optional_expr ;											;		Match
+$ } exe sub_block ) optional_expr											;		[ optional_expr , ;] ] => [ optional_expr -> ; ]
+$ } exe sub_block ) ;														;		Match
+$ } exe sub_block )															)		Match
+$ } exe sub_block															id		[ sub_block , id ] => [ sub_block -> expr ; ]
+$ } exe ; expr										id			[ expr , id ] => [ expr -> R ]
+$ } exe ; R											id			[ R , id ] => [ R -> term ]
+$ } exe ; term										id			[ term , id ] => [ term -> factor relop factor ]
+$ } exe ; factor relop factor						id			[ factor , id ] => [ factor -> id ]
+$ } exe ; factor relop id							id			Match
+$ } exe ; factor relop								=			[ relop , = ] => [ relop -> = ]
+$ } exe ; factor = 									=			Match
+$ } exe ; factor									id			[ factor , id ] => [ factor -> id ]
+$ } exe ;											;			Match
+$ } exe												}			[ exe , e$ ] => [ exe -> e$ ]
+$ }													}			Match
+
+String Accepted.
+	

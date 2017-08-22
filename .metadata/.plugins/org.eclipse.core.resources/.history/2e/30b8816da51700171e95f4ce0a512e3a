@@ -1,0 +1,50 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Stack;
+
+
+public class Test {
+	
+	Stack<String> stack = new Stack<>();
+	ArrayList<Item> symbol = new ArrayList<>();
+	Compile comp = new Compile();
+	
+	Test(String filename) throws IOException {
+		File file = new File(filename);
+		FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
+		while(true) {
+			String line = br.readLine();
+			if(line == null)
+				break;
+			else {
+				Item i = new Item(line);
+				symbol.add(i);
+			}
+		}
+		br.close();
+		stack.push("program");
+	}
+	
+	void compute() {
+		int pos = 0;
+		while(!stack.empty() && pos < symbol.size()) {
+			String top = stack.pop();
+			String input = symbol.get(pos).token;
+			if(input.equals(top)) {
+				pos++;
+				stack.pop();
+			}
+			else {
+				
+			}
+			
+		}
+	}
+	
+	
+}
